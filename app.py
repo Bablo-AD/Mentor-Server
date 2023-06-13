@@ -49,7 +49,7 @@ class Mentor(Resource):
         refine_list = youtube.youtube_searcher()
         helping_assistant.messages = []
         refine_list['completion'] = completion[0]
-        refine_list['tokens_used'] = completion[1]
+        #refine_list['tokens_used'] = completion[1]
         del habitica_data,gkeep_data
         return refine_list
 class Test(Resource):

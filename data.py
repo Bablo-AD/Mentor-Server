@@ -2,7 +2,6 @@ import os
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
-import gkeepapi
 import re
 import io
 
@@ -85,32 +84,3 @@ class HabiticaData:
         habits = [habit.split(' ', 1)[1].strip() for habit in habits]
         return habits
 
-
-class GoogleKeepData:
-    # Initializes the GoogleKeep object
-    def __init__(self, email, password):
-        self.email = email
-        self.keep = gkeepapi.Keep()
-        self.keep.login(email, password)  # Log in to Google Keep
-
-    # Retrieves the labels from Google Keep
-    def get_labels(self):
-        return [label.name for label in self.keep.labels()]
-
-    # Retrieves the notes under a specific label from Google Keep
-    def get_notes(self, label_name):
-        gnotes = self.keep.find(labels=[self.keep.findLabel(label_name)])  # Find notes with the given label
-        return [note for note in gnotes]
-
-    # Retrieves the notes created in the past N days from a given list of notes
-    def get_notes_for_past_days(self, notes, today, num_days):
-         # Get the current date        
-        past_days = today - timedelta(days=num_days)  # Calculate the date N days ago
-        filtered_notes = []
-        for note in notes:
-            if note.timestamps.created.date() >= past_days.date():  # Check if the note was created within the past N days
-                filtered_notes.append(f'{note.title} {note.text}')
-        return filtered_notes
-
-    def execute(self,num_days=NUM_DAYS,today=TARGET_DATE,label_name="Journal"):
-        return self.get_notes_for_past_days(self.get_notes(label_name), today, num_days)

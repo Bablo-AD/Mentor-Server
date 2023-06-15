@@ -185,9 +185,12 @@ class message_history_base:
         See https://github.com/openai/openai-python/blob/main/chatml.md for information on how messages are converted to tokens.""")
 
 class message_history(message_history_base):
-    def load_mentorship(self,habitica_data,gkeep_notes,TODAY,PAST_HISTORY):
+    def load_mentorship(self,gkeep_notes,TODAY,PAST_HISTORY,habitica_data=''):
         self.add_user(f"Hey now you are my partner who criticizes me and helps me grow. Here I provide you my habits and journal entries from the past {PAST_HISTORY} days till {TODAY}")
-        self.add_user(f"My habits: {habitica_data}. My journal: {gkeep_notes}")
+        if habitica_data == '':
+            self.add_user(f"My journal: {gkeep_notes}")
+        else:
+            self.add_user(f"My habits: {habitica_data}. My journal: {gkeep_notes}")
     def load_query(self,goal=''):
         if goal == '':
             self.add_user('Hey i would like to watch youtube can you give me a search query that makes improves or makes my life better from what you have read from my journals')

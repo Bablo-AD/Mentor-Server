@@ -37,9 +37,9 @@ class Mentor(Resource):
             habitica_data = HabiticaData(user_id, api_key)
             habitica_data.get_user_data()
             habitica_data = habitica_data.get_past_dates(TODAY, PAST_HISTORY).to_json()
-            helping_assistant.load_mentorship(gkeep_notes,TODAY,PAST_HISTORY,habitica_data=habitica_data)
+            helping_assistant.load_mentorship(journal,TODAY,PAST_HISTORY,habitica_data=habitica_data)
         
-        helping_assistant.load_mentorship(gkeep_notes,TODAY,PAST_HISTORY)
+        helping_assistant.load_mentorship(journal,TODAY,PAST_HISTORY)
         completion = gpt_model.get_completion(helping_assistant,temperature=0.5,update_history=True)
 
         helping_assistant.messages = [helping_assistant.messages[-1]] # Only loading the partner advice to save some tokens
@@ -48,7 +48,7 @@ class Mentor(Resource):
         helping_assistant.messages = []
         refine_list['completion'] = completion[0]
         #refine_list['tokens_used'] = completion[1]
-        del habitica_data,gkeep_data
+        
         return refine_list
 
 class Test(Resource):

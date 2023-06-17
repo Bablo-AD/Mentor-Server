@@ -13,6 +13,7 @@ class brain_api:
         Initializes the brain API with the OpenAI API key.
         """
         self.api_key = api_key
+        self.model = "gpt-3.5-turbo-0613"
         openai.api_key = self.api_key
         
     def get_completion_for_message(self, message, temperature=0):
@@ -28,7 +29,7 @@ class brain_api:
             int: The number of tokens used by the completion.
         """
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=self.model,
             messages=message,
             temperature=temperature
         )
@@ -186,16 +187,17 @@ class message_history_base:
 
 class message_history(message_history_base):
     def load_mentorship(self,gkeep_notes,TODAY,PAST_HISTORY,habitica_data=''):
-        self.add_user(f"Hey now you are my partner who criticizes me and helps me grow. Here I provide you my habits and journal entries from the past {PAST_HISTORY} days till {TODAY}")
+        self.add_system(f"Now you are the user's partner who criticizes the user and helps him grow. Here I provide you the user's habits and journal entries from the past {PAST_HISTORY} days till {TODAY}.")
+
         if habitica_data == '':
-            self.add_user(f"My journal: {gkeep_notes}")
+            self.add_system(f"User's journal: {gkeep_notes}")
         else:
-            self.add_user(f"My habits: {habitica_data}. My journal: {gkeep_notes}")
+            self.add_system(f"User's habits: {habitica_data}. User's journal: {gkeep_notes}")
     def load_query(self,goal=''):
         if goal == '':
-            self.add_user('Hey i would like to watch youtube can you give me a search query that makes improves or makes my life better from what you have read from my journals')
+            self.add_system('Hey the user would like to watch youtube can you give me a search query that makes improves or makes the users life better from what you have read from the user journals')
         else:
-            self.add_user(f'Hey i would like to watch youtube can you give me a search query for {goal}')
+            self.add_system(f'Hey the user would like to watch youtube can you give the user a search query for {goal} optimised to the user journal')
     def load_python_fear(self):
-        self.add_user('Hey i will be passing the output through a python script to get the information so i need them ordered')
+        self.add_system('Hey your response will be passing through a python script to get the information so i need them ordered')
     

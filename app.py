@@ -1,6 +1,5 @@
 from flask import Flask,request
 from flask_restful import Resource, Api
-from data import HabiticaData
 import recommendation_system
 from brain import message_history, brain_api
 from datetime import datetime,timedelta
@@ -28,30 +27,42 @@ class Mentor(Resource):
         habits = request.json.get('habits')
         journal = request.json.get('journal')
         goal = request.json.get('goal')
-        print(habits)
+        # Mentor Stuff
         TODAY = datetime.today()
         helping_assistant.messages = []
         helping_assistant.load_mentorship(habits,journal,TODAY,PAST_HISTORY)
         completion = gpt_model.get_completion(helping_assistant,temperature=0.5,update_history=True)
 
+        # Recommendation Stuff
+        refine_list = {}
         helping_assistant.messages = [helping_assistant.messages[-1]] # Only loading the partner advice to save some tokens
-        youtube.make_query(helping_assistant,goal)
-        refine_list = youtube.youtube_searcher()
+        refine_list['videos'] = youtube.execute(helping_assistant,goal)
         helping_assistant.messages = []
         refine_list['completion'] = completion[0]
-        #refine_list['tokens_used'] = completion[1]
-        
+        refine_list['tokens_used'] = completion[1]
+        # with open('test.json','w') as file_object:  
+        #     json.dump(refine_list,file_object)
         return refine_list
-
+class Message(Resource):
+    def post(self):
+        output_json = {}
+        messages = request.json.get('messages')
+        chat_model = brain_api(openai_api_key)
+        chat_msg = message_history()
+        chat_msg.messages = messages
+        model_output = chat_model.get_completion(chat_msg)
+        output_json['completion'] = model_output[0]
+        return output_json
 class Test(Resource):
     def post(self):
         print("Testing")
-        habits = request.json.get('habits')
-        print(habits)
         with open('test.json','r') as file_object:  
             data = json.load(file_object)
         return data
+
 api.add_resource(Mentor, '/mentor')
+api.add_resource(Message, '/mentor/messages')
 api.add_resource(Test, '/test')
+
 if __name__ == '__main__':
     app.run(debug=True,host='0.0.0.0')

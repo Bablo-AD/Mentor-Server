@@ -25,21 +25,13 @@ api = Api(app)
 class Mentor(Resource):
     def post(self):
         # Retrieve data from the request
-        api_key = request.json.get('habitica_api_key')
-        user_id = request.json.get('habitica_user_id')
+        habits = request.json.get('habits')
         journal = request.json.get('journal')
         goal = request.json.get('goal')
+        print(habits)
         TODAY = datetime.today()
         helping_assistant.messages = []
-        if api_key == '' and user_id == '':
-            pass
-        else:
-            habitica_data = HabiticaData(user_id, api_key)
-            habitica_data.get_user_data()
-            habitica_data = habitica_data.get_past_dates(TODAY, PAST_HISTORY).to_json()
-            helping_assistant.load_mentorship(journal,TODAY,PAST_HISTORY,habitica_data=habitica_data)
-        
-        helping_assistant.load_mentorship(journal,TODAY,PAST_HISTORY)
+        helping_assistant.load_mentorship(habits,journal,TODAY,PAST_HISTORY)
         completion = gpt_model.get_completion(helping_assistant,temperature=0.5,update_history=True)
 
         helping_assistant.messages = [helping_assistant.messages[-1]] # Only loading the partner advice to save some tokens
@@ -54,6 +46,8 @@ class Mentor(Resource):
 class Test(Resource):
     def post(self):
         print("Testing")
+        habits = request.json.get('habits')
+        print(habits)
         with open('test.json','r') as file_object:  
             data = json.load(file_object)
         return data

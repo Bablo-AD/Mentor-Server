@@ -186,18 +186,20 @@ class message_history_base:
         See https://github.com/openai/openai-python/blob/main/chatml.md for information on how messages are converted to tokens.""")
 
 class message_history(message_history_base):
-    def load_mentorship(self,gkeep_notes,TODAY,PAST_HISTORY,habitica_data=''):
-        self.add_system(f"Now you are the user's partner who criticizes the user and helps him grow. Here I provide you the user's habits and journal entries from the past {PAST_HISTORY} days till {TODAY}.")
+    def load_mentorship(self,journal_data,habitica_data,phone_usage_data,TODAY,PAST_HISTORY):
+        self.add_system(f"Now you are the user's partner who criticizes the user and helps him grow. Here I provide you the details of the user from the past {PAST_HISTORY} days till {TODAY}.")
 
-        if habitica_data == '':
-            self.add_system(f"User's journal: {gkeep_notes}")
-        else:
-            self.add_system(f"User's habits: {habitica_data}. User's journal: {gkeep_notes}")
+        if habitica_data != '':
+            self.add_system(f"User's habits: {habitica_data}")
+        if journal_data != '':
+            self.add_system(f"User's journal: {journal_data}")
+        if phone_usage_data != '':
+            self.add_system(f"User's Phone Usage: {phone_usage_data}")
+        
     def load_query(self,goal=''):
         if goal == '':
             self.add_system('Hey the user would like to watch youtube can you give me a search query that makes improves or makes the users life better from what you have read from the user journals')
         else:
             self.add_system(f'Hey the user would like to watch youtube can you give the user a search query for {goal} optimised to the user journal')
     def load_python_fear(self):
-        self.add_system('Hey your response will be passing through a python script to get the information so i need them ordered')
-    
+        self.add_user('Hey i will be passing the output through a python script to get the information so i need them ordered')

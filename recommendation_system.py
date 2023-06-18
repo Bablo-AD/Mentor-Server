@@ -22,7 +22,6 @@ class youtube_recommender:
     message_history.load_query(goal)
     self.gpt_model.get_completion(message_history,temperature=self.temperature,update_history=True)
     self.query = re.findall(r'"([^"]*)"', message_history.messages[-1]['content'])
-    print(self.query)
     return self.query
 
   def youtube_searcher(self,videos,query=''):

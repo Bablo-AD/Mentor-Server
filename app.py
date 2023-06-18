@@ -27,10 +27,12 @@ class Mentor(Resource):
         habits = request.json.get('habits')
         journal = request.json.get('journal')
         goal = request.json.get('goal')
+        phone_usage = request.json.get('usage')
+        print(habits,journal,goal,phone_usage)
         # Mentor Stuff
         TODAY = datetime.today()
         helping_assistant.messages = []
-        helping_assistant.load_mentorship(habits,journal,TODAY,PAST_HISTORY)
+        helping_assistant.load_mentorship(habits,journal,phone_usage,TODAY,PAST_HISTORY)
         completion = gpt_model.get_completion(helping_assistant,temperature=0.5,update_history=True)
 
         # Recommendation Stuff
@@ -40,11 +42,13 @@ class Mentor(Resource):
         helping_assistant.messages = []
         refine_list['completion'] = completion[0]
         refine_list['tokens_used'] = completion[1]
+        
         # with open('test.json','w') as file_object:  
         #     json.dump(refine_list,file_object)
         return refine_list
 class Message(Resource):
     def post(self):
+        
         output_json = {}
         messages = request.json.get('messages')
         chat_model = brain_api(openai_api_key)
@@ -56,6 +60,10 @@ class Message(Resource):
 class Test(Resource):
     def post(self):
         print("Testing")
+        habits = request.json.get('habits')
+        journal = request.json.get('journal')
+        goal = request.json.get('goal')
+        phone_usage = request.json.get('usage')
         with open('test.json','r') as file_object:  
             data = json.load(file_object)
         return data

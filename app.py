@@ -28,11 +28,15 @@ class Mentor(Resource):
         journal = request.json.get('journal')
         goal = request.json.get('goal')
         phone_usage = request.json.get('usage')
-        print(habits,journal,goal,phone_usage)
+        usergoal = request.json.get('usergoal')
+        selfperception = request.json.get('selfperception')
+
         # Mentor Stuff
         TODAY = datetime.today()
         helping_assistant.messages = []
         helping_assistant.load_mentorship(habits,journal,phone_usage,TODAY,PAST_HISTORY)
+        if selfperception != '' and  usergoal != '':
+            helping_assistant.add_system(f'Hey this is what the user thinks of himself {selfperception} and this is his goal or ambition {usergoal}')
         completion = gpt_model.get_completion(helping_assistant,temperature=0.5,update_history=True)
 
         # Recommendation Stuff

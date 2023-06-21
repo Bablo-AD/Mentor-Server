@@ -132,7 +132,7 @@ class message_history_base:
         Args:
             content (str): The content of the system message.
         """
-        self.messages.append({"role": "assistant", "content": content})
+        self.messages.append({"role": "system", "content": content})
     
     def append(self, content_list):
         """

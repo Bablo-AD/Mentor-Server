@@ -9,8 +9,7 @@ import json
 
 load_dotenv()
 
-PAST_HISTORY = 3
-GKEEP_LABEL = "Journal"
+PAST_HISTORY = 1
 openai_api_key = os.environ.get('OPENAI_API_KEY')
 
 helping_assistant = message_history()

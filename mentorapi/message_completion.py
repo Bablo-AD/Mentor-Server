@@ -6,8 +6,6 @@ import json
 from prompthandler import PromptHandler
 import os
 
-app = Flask(__name__)
-api = Api(app)
 
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate("./anti-distractor-firebase-adminsdk-lxfge-af9394634f.json")
@@ -55,6 +53,4 @@ class Message_Completion(Resource):
             user_data['messages'] = message
             messages_collection.document(user_id).set(user_data)
         return jsonify({"response": output}), 200
-
-api.add_resource(Message_Completion, '/get_completion')
 

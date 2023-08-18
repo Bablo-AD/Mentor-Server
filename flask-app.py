@@ -1,4 +1,4 @@
-from mentorapi import Api,app
+from mentorapi import app
 
 if __name__ == '__main__':
     app.run(host='localhost',debug=True)

@@ -18,12 +18,12 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 class Message_Completion(Resource):
    
-    def post():
+    def post(self):
         # Parse the JSON data from the request
         data = request.json
 
         # Check if API key and user id are present in the request
-        if 'apikey' not in data or 'user_id' not in data:
+        if data.get('apikey') is None or data.get('user_id') is None:
             return jsonify({"error": "Invalid request"}), 400
 
         
@@ -36,11 +36,9 @@ class Message_Completion(Resource):
             return jsonify({"error": "User ID not found"}), 404
         user_data = user_doc.to_dict()
         # Check if the API key is valid
-        try:
-            API_KEY = user_data['apikey']
-        except KeyError:
-            return jsonify({"error": "Invalid API key"}), 401
-        if data['apikey'] != API_KEY:
+        API_KEY = data['apikey']
+       
+        if user_data['apikey'] != API_KEY:
             return jsonify({"error": "Invalid API key"}), 401
         # Get the message data from the Firestore document
         message = user_data.get('messages',"{'head':[],'body':[]}")
@@ -49,8 +47,19 @@ class Message_Completion(Resource):
         model.load(message)
         output = model.get_completion(data['messages'])
         message = json.dumps(model.dump())
-        if data.get('update_history', False):
+        if data.get('update_history', True):
             user_data['messages'] = message
             messages_collection.document(user_id).set(user_data)
         return jsonify({"response": output}), 200
 
+class Test(Resource):
+    def post(self):
+        # Parse the JSON data from the request
+        data = request.json
+
+        # Check if API key and user id are present in the request
+        if data.get('apikey') is None or  data.get('user_id') is None:
+            return jsonify({"error": "Invalid request"}), 400
+        with open('test.json','r') as file_object:  
+            response = json.load(file_object)
+        return response,200

@@ -1,11 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,make_response
 from flask_restful import Resource, Api
 import firebase_admin
 from firebase_admin import credentials, firestore
 import json
 from prompthandler import PromptHandler
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate("./anti-distractor-firebase-adminsdk-lxfge-af9394634f.json")
@@ -24,25 +25,24 @@ class Message_Completion(Resource):
 
         # Check if API key and user id are present in the request
         if data.get('apikey') is None or data.get('user_id') is None:
-            return jsonify({"error": "Invalid request"}), 400
+            return jsonify({"error": "Invalid request user_id or apikey is not correct"}), 400
 
         
         # Get the user ID from the request data
         user_id = data['user_id']
-
+        
         # Query Firestore to get the message corresponding to the user ID
         user_doc = messages_collection.document(user_id).get()
         if not user_doc.exists:
-            return jsonify({"error": "User ID not found"}), 404
+            return make_response(jsonify({"error": "User ID not found"}), 401)
         user_data = user_doc.to_dict()
         # Check if the API key is valid
         API_KEY = data['apikey']
-       
         if user_data['apikey'] != API_KEY:
-            return jsonify({"error": "Invalid API key"}), 401
+            return make_response(jsonify({"error": "Invalid API key"}), 401)
         # Get the message data from the Firestore document
-        message = user_data.get('messages',"{'head':[],'body':[]}")
-        message = json.loads(message)
+        message = user_data.get('messages','{"head": [], "body": []}')
+        message = json.loads(message.strip())
         model = PromptHandler(api_key=OPENAI_API_KEY)
         model.load(message)
         output = model.get_completion(data['messages'])
@@ -50,7 +50,8 @@ class Message_Completion(Resource):
         if data.get('update_history', True):
             user_data['messages'] = message
             messages_collection.document(user_id).set(user_data)
-        return jsonify({"response": output}), 200
+        
+        return make_response(jsonify({"response": output}), 200)
 
 class Test(Resource):
     def post(self):

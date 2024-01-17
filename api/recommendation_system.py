@@ -4,25 +4,17 @@ import google.auth
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import re
-from brain import brain_api,message_history
 
 class youtube_recommender:
-  def __init__(self,gpt_model):
-    # Set up the YouTube Data API client
-    self.temperature = 0.3
+  def __init__(self):
+    # Set up the YouTube Data API client\
     api_service_name = "youtube"
     api_version = "v3"
     DEVELOPER_KEY = os.environ.get('YOUTUBE_API_KEY') # Replace with your own API key
     self.youtube = build(api_service_name, api_version, developerKey=DEVELOPER_KEY)
-    self.gpt_model = gpt_model
 
-  # Makes query
-  def make_query(self,message_history,goal=''):
-    message_history.load_python_fear()
-    message_history.load_query(goal)
-    self.gpt_model.get_completion(message_history,temperature=self.temperature,update_history=True)
-    self.query = re.findall(r'"([^"]*)"', message_history.messages[-1]['content'])
-    return self.query
+
+
 
   def youtube_searcher(self,videos,query=''):
     if query == '':
@@ -47,7 +39,6 @@ class youtube_recommender:
 
 
   def execute(self,message_history,goal=''):
-    self.make_query(message_history,goal)
     videos = {}
     for i in self.query:
       self.youtube_searcher(videos,query=i)

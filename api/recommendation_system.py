@@ -23,7 +23,7 @@ class youtube_recommender:
     q=query,
     type="video",
     part="id,snippet",
-    maxResults=5,
+    maxResults=3,
     order='rating',
     ).execute()
     

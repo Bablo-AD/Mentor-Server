@@ -5,7 +5,8 @@ from firebase_admin import credentials, firestore
 import json
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
+from flask_restful import reqparse
+import openai
 from api.recommendation_system import youtube_recommender
 import time
 load_dotenv()
@@ -19,14 +20,17 @@ db = firestore.client()
 messages_collection = db.collection("users")
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
 yt_recommender = youtube_recommender()
 class Message_Completion(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('assistant_model', type=str, location='view_args')
 
-    def post(self):
+    def post(self,assistant_model):
         # Parse the JSON data from the request
         data = request.json
-
+        print(data)
         # Check if API key and user id are present in the request
         if data.get('apikey') is None or data.get('user_id') is None:
             return jsonify({"error": "Invalid request user_id or apikey is not correct"}), 400
@@ -49,17 +53,22 @@ class Message_Completion(Resource):
         if user_data.get('thread_id') is None:
             thread = client.beta.threads.create()
             data['thread_id'] = thread.id
-        thread_id = user_data['thread_id']
+            user_doc = messages_collection.document(user_id).update({"thread_id":thread.id})
+    
+
+        thread_id = user_data.get('thread_id')
         message = client.beta.threads.messages.create(
-                    thread_id=thread_id,
-                    role="user",
-                    content=data['messages'],
-                )
+                        thread_id=thread_id,
+                        role="user",
+                        content=data['messages'],
+                    )
         
-        if data['assistant_model'] == 'mentor':
+        print(assistant_model)
+        if assistant_model == 'mentor':
             assistant_id = "asst_kp023V8yl5vmyyHem5MhRaB0"
-        elif data['assistant_model'] == 'mentorlite':
+        elif assistant_model == 'mentorlite' or assistant_model == '':
             assistant_id = "asst_CYh4Ek8bCbeB5xRBBx6k50q1"
+        
         run = client.beta.threads.runs.create(
                 thread_id=thread_id,
                 assistant_id=assistant_id,
@@ -68,31 +77,52 @@ class Message_Completion(Resource):
                 thread_id=thread_id,
                 run_id=run.id
                 )
+        
+        tools_called = []
         while True:
             run = client.beta.threads.runs.retrieve(
                 thread_id=thread_id,
                 run_id=run.id
             )
+            if run.status == "requires_action":
+                tool_output = []
+                
+                for i in run.required_action.submit_tool_outputs.tool_calls:
+                    tools_called.append((i.function.name,i.function.arguments))
+                    tool_output.append({
+                            "tool_call_id": i.id,
+                            "output": "Success",
+                        })
+                run = client.beta.threads.runs.submit_tool_outputs(
+                    thread_id=thread_id,
+                    run_id=run.id,
+                    tool_outputs=tool_output
+                    )
             if run.status == "completed":
                 break
-            time.sleep(1)
-        if run.status == "completed":
-            messages = client.beta.threads.messages.list(thread_id=thread_id,order="desc",limit=2)
-            messages = messages.data[-1].content[-1].text.value
-            
-            response = {"response": messages}
-            for i in run.required_action.submit_tool_outputs.tool_calls:
-                if i.function.name == "get_videos":
-                    videos={}
-                    videos = yt_recommender.youtube_searcher(videos,i.function.arguments)
-                    response['videos'] = videos
-                elif i.function.name == "send_notifications":
-                    response['notifications'] = i.function.arguments
-                
-            return make_response(jsonify(response), 200)
-        elif run.status == "active":
-            client.beta.threads.delete(thread_id)
-            return make_response(jsonify({"response": "Assistant is gone for vocation"}), 200)
+            time.sleep(1.5)
+        
+        messages = client.beta.threads.messages.list(thread_id=thread_id,limit=2)
+        print(messages.json())
+        messages = messages.data[0].content[-1].text.value
+        response = {"response": messages}
+        if tools_called !=[]:
+            for i in tools_called:
+                if i[0] == "get_videos":
+                    
+                    video_list = {}
+                    for j in i[1]:
+                        videos={}
+                        video_list.update(yt_recommender.youtube_searcher(videos,query=j))
+                    response['videos'] = video_list
+                    
+                elif i[0] == "send_notifications":
+                    response['notifications'] = i[1]
+        f=open('test.json','w')
+        json.dump(response,f)
+        f.close()
+        return make_response(jsonify(response), 200)
+        
 
 class Test(Resource):
     def post(self):

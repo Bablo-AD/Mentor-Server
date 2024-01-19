@@ -4,7 +4,6 @@ from .message_completion import Message_Completion,Test
 import dotenv
 import os
 from datetime import timedelta
-from api.message_completion_legacy import Message_Completion_legacy
 
 dotenv.load_dotenv()
 
@@ -14,6 +13,6 @@ api = Api(app)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 
 
-api.add_resource(Message_Completion, '/mentor/chat/dev')
+api.add_resource(Message_Completion, '/mentor/chat/<string:assistant_model>')
 api.add_resource(Test, '/test')
-api.add_resource(Message_Completion_legacy,'/mentor/chat')
+

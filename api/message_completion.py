@@ -28,9 +28,12 @@ class Message_Completion(Resource):
         self.reqparse.add_argument('assistant_model', type=str, location='view_args')
 
     def post(self,assistant_model):
+
+
+        # Getting data from user
+
         # Parse the JSON data from the request
         data = request.json
-        print(data)
         # Check if API key and user id are present in the request
         if data.get('apikey') is None or data.get('user_id') is None:
             return jsonify({"error": "Invalid request user_id or apikey is not correct"}), 400
@@ -54,16 +57,15 @@ class Message_Completion(Resource):
             thread = client.beta.threads.create()
             data['thread_id'] = thread.id
             user_doc = messages_collection.document(user_id).update({"thread_id":thread.id})
-    
+        
 
+        # Validation got over so now we can send the message to the assistant
         thread_id = user_data.get('thread_id')
         message = client.beta.threads.messages.create(
                         thread_id=thread_id,
                         role="user",
                         content=data['messages'],
                     )
-        
-        print(assistant_model)
         if assistant_model == 'mentor':
             assistant_id = "asst_kp023V8yl5vmyyHem5MhRaB0"
         elif assistant_model == 'mentorlite' or assistant_model == '':
@@ -79,11 +81,14 @@ class Message_Completion(Resource):
                 )
         
         tools_called = []
+        # Waiting till the run is completed
         while True:
             run = client.beta.threads.runs.retrieve(
                 thread_id=thread_id,
                 run_id=run.id
             )
+
+            # If the run requires action, submit the tool outputs
             if run.status == "requires_action":
                 tool_output = []
                 
@@ -103,24 +108,23 @@ class Message_Completion(Resource):
             time.sleep(1.5)
         
         messages = client.beta.threads.messages.list(thread_id=thread_id,limit=2)
-        print(messages.json())
         messages = messages.data[0].content[-1].text.value
         response = {"response": messages}
+        # If the run is completed, send the response to the user
         if tools_called !=[]:
             for i in tools_called:
                 if i[0] == "get_videos":
+
+                    videos={}
+                    try:
+                        yt_recommender.youtube_searcher(videos,query=i[1])
+                        response['videos'] = videos
+                    except:
+                        pass
                     
-                    video_list = {}
-                    for j in i[1]:
-                        videos={}
-                        video_list.update(yt_recommender.youtube_searcher(videos,query=j))
-                    response['videos'] = video_list
                     
                 elif i[0] == "send_notifications":
                     response['notifications'] = i[1]
-        f=open('test.json','w')
-        json.dump(response,f)
-        f.close()
         return make_response(jsonify(response), 200)
         
 

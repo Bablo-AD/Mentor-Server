@@ -1,6 +1,1 @@
-*.bat
-.env
-/env
-__pycache__
-.vscode
-*.json
+venv

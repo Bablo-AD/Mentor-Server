@@ -16,9 +16,8 @@ class youtube_recommender:
 
 
 
-  def youtube_searcher(self,videos,query=''):
-    if query == '':
-      query = self.query
+  def youtube_searcher(self,query,videos={}):
+    
     search_response = self.youtube.search().list(
     q=query,
     type="video",

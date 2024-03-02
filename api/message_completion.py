@@ -85,7 +85,7 @@ class Message_Completion(Resource):
         while True:
             run = client.beta.threads.runs.retrieve(
                 thread_id=thread_id,
-                run_id=run.id
+                run_id=runid
             )
 
             # If the run requires action, submit the tool outputs

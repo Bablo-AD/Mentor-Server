@@ -1,6 +1,3 @@
-*.bat
+env
 .env
-/env
-__pycache__
-.vscode
-*.json
+anti-distractor-firebase-adminsdk-lxfge-af9394634f.json

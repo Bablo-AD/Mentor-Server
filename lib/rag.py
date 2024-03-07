@@ -46,7 +46,7 @@ standard_tools = [
              description="this gives detailed information about habit forming",
          ),
      ),
-     
+    answer_engine,
     notification_engine,
 ]
 
@@ -58,6 +58,6 @@ class RAG:
         chat_store_key=userid,
     )
         llm = OpenAI(model=model)
-        self.agent = ReActAgent.from_tools(tools, llm=llm, verbose=False, context=context,memory=chat_memory)
+        self.agent = ReActAgent.from_tools(tools, llm=llm, verbose=True, context=context,memory=chat_memory)
     def make_query(self,prompt):
         return self.agent.query(prompt)

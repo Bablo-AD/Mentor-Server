@@ -9,8 +9,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import openai
 from lib import rag
-
-
+from lib.tools import Notification_var,Answer_var
 class MessageData(BaseModel):
     apikey: str
     user_id: str
@@ -40,5 +39,13 @@ async def get_model(data:MessageData):
         if user_data['apikey'] != API_KEY:
             return make_response(jsonify({"error": "Invalid API key"}), 401)
         model = rag.RAG(user_id)
-        output = model.make_query(data.messages)
-        return {"message": output}
+        def get_reply():
+            try:
+                answer = model.make_query(data.messages)
+                print(answer)
+                return answer
+            except ValueError as e:
+                return Answer_var.get()
+        output = get_reply()
+        Notification = Notification_var.get()
+        return {"reply":Answer_var.get(),"notification":{"title":Notification[0],"message":Notification[1]}}

@@ -2,7 +2,7 @@ from llama_index.core.tools import FunctionTool
 import os
 from contextvars import ContextVar
 Notification_var: ContextVar[list] = ContextVar("Notifications", default=["",""])
-Answer_var: ContextVar[str] = ContextVar("Answer", default="")
+Answer_var: ContextVar[list] = ContextVar("Answer", default=[])
 #yt_recommender = recommendation_system.youtube_recommender()
 
 # def recommend_videos(query):
@@ -31,7 +31,9 @@ notification_engine = FunctionTool.from_defaults(
 )
 
 def answer(message):
-    Answer_var.set(message)
+    message_list = Answer_var.get()
+    message_list.append(message)
+    Answer_var.set(message_list)
     return "Sent Message"
 
 answer_engine = FunctionTool.from_defaults(

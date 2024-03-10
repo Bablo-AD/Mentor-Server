@@ -31,7 +31,6 @@ finally:
 
 # set up ChromaVectorStore and load in data
 
-chat_store = SimpleChatStore()
 
 
 # Query Data
@@ -50,14 +49,21 @@ standard_tools = [
     notification_engine,
 ]
 
+
 class RAG:
-    def __init__(self,userid,model="gpt-3.5-turbo-0613",context=context,tools=standard_tools):
-        chat_memory = ChatMemoryBuffer.from_defaults(
-        token_limit=3000,
-        chat_store=chat_store,
-        chat_store_key=userid,
-    )
+    def __init__(self,userid,chatmemory="",model="gpt-3.5-turbo-0613",context=context,tools=standard_tools):
+        
+        if chatmemory == "":
+            self.chat_store = SimpleChatStore()
+            self.chat_memory = ChatMemoryBuffer.from_defaults(
+            chat_store=self.chat_store,
+            chat_store_key=userid,
+        )
+        else:
+            self.chat_store = SimpleChatStore.parse_raw(chatmemory)
+            self.chat_memory = ChatMemoryBuffer.from_defaults(chat_store=self.chat_store)
         llm = OpenAI(model=model)
-        self.agent = ReActAgent.from_tools(tools, llm=llm, verbose=True, context=context,memory=chat_memory)
+        self.agent = ReActAgent.from_tools(tools, llm=llm, verbose=True, context=context,memory=self.chat_memory)
+        
     def make_query(self,prompt):
         return self.agent.query(prompt)

@@ -9,7 +9,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import openai
 from lib import rag
-from lib.tools import Notification_var,Answer_var
+from lib.tools import Notification_var,Answer_var,Video_var
 from starlette.middleware.base import BaseHTTPMiddleware
 class MessageData(BaseModel):
     apikey: str
@@ -30,7 +30,7 @@ class ResetContextMiddleware(BaseHTTPMiddleware):
         # Reset the ContextVar
         Notification_var.set(["",""])
         Answer_var.set([])
-        
+        Video_var.set({})
         # Process the request
         response = await call_next(request)
         return response
@@ -52,6 +52,7 @@ async def get_model(data:MessageData):
     if user_data['apikey'] != API_KEY:
         return make_response(jsonify({"error": "Invalid API key"}), 401)
     model = rag.RAG(user_id,chatmemory=data.message_history)
+    output=''
     try:
         output = [model.make_query(data.messages).response]
         
@@ -61,5 +62,5 @@ async def get_model(data:MessageData):
     if answer != []:
         output=answer
     Notification = Notification_var.get()
-    
-    return {"reply":output,"notification":{"title":Notification[0],"message":Notification[1]},"message_history":model.chat_store.json()}
+
+    return {"reply":output,"notification":{"title":Notification[0],"message":Notification[1]},"message_history":model.chat_store.json(),"videos":Video_var.get()}

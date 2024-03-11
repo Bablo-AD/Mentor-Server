@@ -1,23 +1,26 @@
 from llama_index.core.tools import FunctionTool
 import os
 from contextvars import ContextVar
+from lib import recommendation_system
+yt_recommender = recommendation_system.youtube_recommender()
 Notification_var: ContextVar[list] = ContextVar("Notifications", default=["",""])
 Answer_var: ContextVar[list] = ContextVar("Answer", default=[])
-#yt_recommender = recommendation_system.youtube_recommender()
+Video_var: ContextVar[dict] = ContextVar("Videos", default={})
 
-# def recommend_videos(query):
-#     try:
-#         print(yt_recommender.youtube_searcher(query))
-#     except:
-#         pass
 
-#     return "Recommended Videos"
+def recommend_videos(query):
+    videos = Video_var.get()
+    video_data = yt_recommender.youtube_searcher(query=query)
+    videos.update(video_data)
+    Video_var.set(videos)
 
-# youtube_engine = FunctionTool.from_defaults(
-#     fn=recommend_videos,
-#     name="youtube_video_recommender",
-#     description="this tool is used to recommend youtube videos to users from search query",
-# )
+    return "Sent Videos"
+
+youtube_engine = FunctionTool.from_defaults(
+    fn=recommend_videos,
+    name="youtube",
+    description="this tool is used to send youtube videos to users from search query",
+)
 
 def notification(title,body):
     Notification_var.set([title,body])

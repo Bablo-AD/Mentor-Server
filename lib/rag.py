@@ -47,7 +47,9 @@ standard_tools = [
          ),
      ), 
     answer_engine,
+    youtube_engine,
     notification_engine,
+    
 ]
 
 

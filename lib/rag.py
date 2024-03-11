@@ -26,15 +26,16 @@ except ValueError:
     index = VectorStoreIndex.from_documents(
     documents, storage_context=storage_context
 )
+
 finally:
     print("Loaded Data")
 
 # set up ChromaVectorStore and load in data
 
 
-
 # Query Data
 query_engine = index.as_query_engine()
+
 
 
 standard_tools = [   
@@ -44,26 +45,29 @@ standard_tools = [
             name="AtomicHabits",
              description="this gives detailed information about habit forming",
          ),
-     ),
+     ), 
     answer_engine,
     notification_engine,
 ]
 
 
 class RAG:
-    def __init__(self,userid,chatmemory="",model="gpt-3.5-turbo-0613",context=context,tools=standard_tools):
-        
+    def __init__(self,userid,chatmemory='',model="gpt-3.5-turbo-0613",context=context,tools=standard_tools):
         if chatmemory == "":
             self.chat_store = SimpleChatStore()
             self.chat_memory = ChatMemoryBuffer.from_defaults(
             chat_store=self.chat_store,
             chat_store_key=userid,
+            token_limit=3000,
         )
         else:
             self.chat_store = SimpleChatStore.parse_raw(chatmemory)
             self.chat_memory = ChatMemoryBuffer.from_defaults(chat_store=self.chat_store)
-        llm = OpenAI(model=model)
-        self.agent = ReActAgent.from_tools(tools, llm=llm, verbose=True, context=context,memory=self.chat_memory)
         
+        llm = OpenAI(model=model)
+        
+        self.agent = ReActAgent.from_tools(tools, llm=llm, verbose=True, context=context,memory=self.chat_memory)
+       
     def make_query(self,prompt):
-        return self.agent.query(prompt)
+        reponse = self.agent.chat(prompt)
+        return reponse

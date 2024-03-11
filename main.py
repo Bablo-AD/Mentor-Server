@@ -11,7 +11,6 @@ import openai
 from lib import rag
 from lib.tools import Notification_var,Answer_var
 from starlette.middleware.base import BaseHTTPMiddleware
-
 class MessageData(BaseModel):
     apikey: str
     user_id: str
@@ -41,7 +40,6 @@ app.add_middleware(ResetContextMiddleware)
 @app.post("/mentor")
 async def get_model(data:MessageData):
      # Get the user ID from the request data
-    print(data)
     user_id = data.user_id
 
     # Query Firestore to get the message corresponding to the user ID
@@ -54,7 +52,6 @@ async def get_model(data:MessageData):
     if user_data['apikey'] != API_KEY:
         return make_response(jsonify({"error": "Invalid API key"}), 401)
     model = rag.RAG(user_id,chatmemory=data.message_history)
-    
     try:
         output = [model.make_query(data.messages).response]
         
@@ -64,5 +61,5 @@ async def get_model(data:MessageData):
     if answer != []:
         output=answer
     Notification = Notification_var.get()
-    messages_history = model.chat_store.json()
-    return {"reply":output,"notification":{"title":Notification[0],"message":Notification[1]},"message_history":messages_history}
+    
+    return {"reply":output,"notification":{"title":Notification[0],"message":Notification[1]},"message_history":model.chat_store.json()}

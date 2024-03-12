@@ -60,7 +60,7 @@ class RAG:
             self.chat_memory = ChatMemoryBuffer.from_defaults(
             chat_store=self.chat_store,
             chat_store_key=userid,
-            token_limit=3000,
+            token_limit=2000,
         )
         else:
             self.chat_store = SimpleChatStore.parse_raw(chatmemory)
@@ -69,7 +69,6 @@ class RAG:
         llm = OpenAI(model=model)
         
         self.agent = ReActAgent.from_tools(tools, llm=llm, verbose=True, context=context,memory=self.chat_memory)
-       
     def make_query(self,prompt):
         reponse = self.agent.chat(prompt)
         return reponse

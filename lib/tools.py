@@ -19,7 +19,7 @@ def recommend_videos(query):
 youtube_engine = FunctionTool.from_defaults(
     fn=recommend_videos,
     name="youtube",
-    description="this tool is used to send youtube videos to users from search query",
+    description="This is used to suggest useful youtube videos to user",
 )
 
 def notification(title,body):
@@ -30,7 +30,7 @@ def notification(title,body):
 notification_engine = FunctionTool.from_defaults(
     fn=notification,
     name="notification",
-    description="this tool is used to send notification to user to help him",
+    description="this tool is used to send notification to user",
 )
 
 def answer(message):
@@ -42,5 +42,5 @@ def answer(message):
 answer_engine = FunctionTool.from_defaults(
     fn=answer,
     name="answer",
-    description="this tool is used to send reply messages to the user",
+    description="this tool is used to send reply message to the user",
 )

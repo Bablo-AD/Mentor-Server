@@ -23,7 +23,10 @@ class youtube_recommender:
     type="video",
     part="id,snippet",
     maxResults=3,
-    order='rating',
+    order='relevance',
+    safeSearch='strict',
+    videoEmbeddable='true',
+    videoDuration='medium'
     ).execute()
     
     for search_result in search_response.get("items", []):

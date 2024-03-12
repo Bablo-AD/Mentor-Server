@@ -62,5 +62,4 @@ async def get_model(data:MessageData):
     if answer != []:
         output=answer
     Notification = Notification_var.get()
-
     return {"reply":output,"notification":{"title":Notification[0],"message":Notification[1]},"message_history":model.chat_store.json(),"videos":Video_var.get()}

@@ -30,10 +30,6 @@ except ValueError:
 finally:
     print("Loaded Data")
 
-# set up ChromaVectorStore and load in data
-
-
-# Query Data
 query_engine = index.as_query_engine()
 
 
@@ -49,26 +45,29 @@ standard_tools = [
     answer_engine,
     youtube_engine,
     notification_engine,
-    
 ]
 
 
 class RAG:
-    def __init__(self,userid,chatmemory='',model="gpt-3.5-turbo-0613",context=context,tools=standard_tools):
+    def __init__(self,userid,chatmemory='',model="gpt-3.5-turbo",context=context,tools=standard_tools):
         if chatmemory == "":
             self.chat_store = SimpleChatStore()
             self.chat_memory = ChatMemoryBuffer.from_defaults(
             chat_store=self.chat_store,
             chat_store_key=userid,
-            token_limit=2000,
+            token_limit=3000,
         )
         else:
             self.chat_store = SimpleChatStore.parse_raw(chatmemory)
             self.chat_memory = ChatMemoryBuffer.from_defaults(chat_store=self.chat_store)
         
         llm = OpenAI(model=model)
-        
+        self.load_engines()
         self.agent = ReActAgent.from_tools(tools, llm=llm, verbose=True, context=context,memory=self.chat_memory)
+    def load_engines(self):
+        if 'parentmail' in User_var.get():
+            
+            standard_tools.append(mail_engine)
     def make_query(self,prompt):
         reponse = self.agent.chat(prompt)
         return reponse

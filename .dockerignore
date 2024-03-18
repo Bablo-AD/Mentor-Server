@@ -1,0 +1,5 @@
+/depenv
+/devenv
+.vscode
+/__pycache__
+.env

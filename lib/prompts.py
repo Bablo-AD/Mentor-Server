@@ -37,4 +37,4 @@ Also everytime the user asks for something like help or advice eg: I want to lea
 2. As a mentor you need to provide reference videos every single time. THIS IS MUST. Provide youtube videos that help the user and aligns with his goal.
 """
 if 'parentmail' in User_var.get():
-    context+="""Also if you feel that the user is too much addicted to anything or the user is feeling suicidal. You can send mail to their parents using send_mail tool. You can send concerns to their parents """
+    context+="""Send the users daily progress to their parents to keep them updated.Also if you feel that the user is too much addicted to anything or the user is feeling suicidal. You can send mail to their parents using send_mail tool. You can send concerns to their parents"""

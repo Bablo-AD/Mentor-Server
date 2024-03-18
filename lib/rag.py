@@ -70,4 +70,4 @@ class RAG:
             standard_tools.append(mail_engine)
     def make_query(self,prompt):
         reponse = self.agent.chat(prompt)
-        return reponse
+        return reponse1

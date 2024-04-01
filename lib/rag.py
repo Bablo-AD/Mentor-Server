@@ -49,7 +49,7 @@ standard_tools = [
 
 
 class RAG:
-    def __init__(self,userid,chatmemory='',model="gpt-3.5-turbo",context=context,tools=standard_tools):
+    def __init__(self,userid,chatmemory='',model="gpt-3.5-turbo",context=context,tools=standard_tools,userdata=''):
         if chatmemory == "":
             self.chat_store = SimpleChatStore()
             self.chat_memory = ChatMemoryBuffer.from_defaults(
@@ -62,12 +62,15 @@ class RAG:
             self.chat_memory = ChatMemoryBuffer.from_defaults(chat_store=self.chat_store)
         
         llm = OpenAI(model=model)
-        self.load_engines()
+        self.load_engines(userdata)
+        
         self.agent = ReActAgent.from_tools(tools, llm=llm, verbose=True, context=context,memory=self.chat_memory)
-    def load_engines(self):
+    def load_engines(self,userdata):
+        if userdata != '':
+            standard_tools.append(user_engine)
         if 'parentmail' in User_var.get():
             
             standard_tools.append(mail_engine)
     def make_query(self,prompt):
         reponse = self.agent.chat(prompt)
-        return reponse1
+        return reponse

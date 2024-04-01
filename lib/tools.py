@@ -13,6 +13,7 @@ Notification_var: ContextVar[list] = ContextVar("Notifications", default=["",""]
 Answer_var: ContextVar[list] = ContextVar("Answer", default=[])
 Video_var: ContextVar[dict] = ContextVar("Videos", default={})
 User_var: ContextVar[dict] = ContextVar("User",default={})
+History_var: ContextVar[str] = ContextVar("Histrory",default="")
 loader = YoutubeTranscriptReader()
 
 # Set up the SMTP server
@@ -89,4 +90,13 @@ mail_engine = FunctionTool.from_defaults(
     fn=send_mail,
     name="sendmail",
     description="this tool is used to send mail to their parents about users concerns",
+)
+
+def get_user_data(date:str):
+    data = json.loads(History_var.get())['usage']
+    return data.get(date)
+user_engine = FunctionTool.from_defaults(
+    fn=get_user_data,
+    name="getuserdata",
+    description="this tool is used to get user phone usage data for a particular date Format year-month-day eg=2022-01-01",
 )

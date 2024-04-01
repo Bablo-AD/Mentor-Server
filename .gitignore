@@ -1,8 +1,8 @@
 *.bat
-.env
 /devenv
 /depenv
 __pycache__
-.vscode
+.env
 *.json
+.vscode
 /data/raw

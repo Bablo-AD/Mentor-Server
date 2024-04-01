@@ -14,6 +14,7 @@ from typing import List
 from pydantic import BaseModel, Field
 from llama_index.core.output_parsers import PydanticOutputParser
 import json
+from llama_index.readers.json import JSONReader
 
 class Video(BaseModel):
     """Object representing a single movie."""
